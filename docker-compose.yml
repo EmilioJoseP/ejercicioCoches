@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: 'ejercicio_coches'
+    image: postgres:13.6
+    environment:
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "ejercicio_coches"
+    ports:
+      - "5432:5432"
