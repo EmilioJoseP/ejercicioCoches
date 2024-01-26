@@ -11,6 +11,10 @@ public class ModeloService {
     @Autowired
     ModeloRepository modeloRepository;
 
+    public Modelo findByIdModelo(int idModelo) {
+        return modeloRepository.findByIdModelo(idModelo);
+    }
+
     public String findNombreByIdModelo(int idModelo) {
         return modeloRepository.findByIdModelo(idModelo).getNombreModelo();
     }

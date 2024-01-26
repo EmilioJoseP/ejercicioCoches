@@ -19,7 +19,7 @@ public class Vehiculo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idVehiculo;
 
-    @Column(name = "matricula_vehiculo")
+    @Column(name = "matricula_vehiculo", unique = true)
     private String matriculaVehiculo;
 
     @Column(name = "pintura")

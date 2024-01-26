@@ -14,7 +14,7 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
 
     Vehiculo findByMatriculaVehiculo(String matriculaVehiculo);
 
-    //TODO
+    Vehiculo findByidVehiculo(int idVehiculo);
 
     @Query(value = "SELECT v.matricula_vehiculo, v.id_vehiculo, v.id_modelo, v.pintura, v.fecha_matriculacion, v.combustible " +
             "FROM vehiculos v " +
