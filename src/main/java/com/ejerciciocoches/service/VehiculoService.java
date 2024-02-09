@@ -1,35 +1,30 @@
 package com.ejerciciocoches.service;
 
-import com.ejerciciocoches.exceptions.SQLException;
+import com.ejerciciocoches.exceptions.DomainException;
 import com.ejerciciocoches.model.Vehiculo;
 import com.ejerciciocoches.model.VehiculoRequestDTO;
 import com.ejerciciocoches.model.VehiculoResponseDTO;
+import com.ejerciciocoches.model.VehiculoUpdateRequestDTO;
 import com.ejerciciocoches.model.mapper.VehiculoMapper;
 import com.ejerciciocoches.repository.VehiculoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class VehiculoService {
-    @Autowired
     VehiculoRepository vehiculoRepository;
 
-    @Autowired
     VehiculoMapper vehiculoMapper;
 
-    @Autowired
     ModeloService modeloService;
-
-    @Autowired
     MarcaService marcaService;
 
     @Transactional //Por hacer...
-    public VehiculoResponseDTO updateVehiculo(VehiculoRequestDTO vehiculoRequestDTO) throws Exception {
+    public VehiculoResponseDTO updateVehiculo(VehiculoUpdateRequestDTO vehiculoRequestDTO) throws DomainException {
         if (comprobarMarcaYModelo(vehiculoRequestDTO.getIdModelo(), vehiculoRequestDTO.getIdMarca())) {
             Vehiculo vehiculo = vehiculoRepository.findByMatriculaVehiculo(vehiculoRequestDTO.getMatriculaVehiculo());
             vehiculo.setModelo(modeloService.findByIdModelo(vehiculoRequestDTO.getIdModelo()));
@@ -40,67 +35,55 @@ public class VehiculoService {
             vehiculoRepository.save(vehiculo);
             return convertToDTO(vehiculo);
         } else {
-            throw new Exception();
+            throw new DomainException("Vehiculo no valido");
         }
     }
 
-    public VehiculoResponseDTO insertarVehiculo(VehiculoRequestDTO vehiculoRequestDTO) throws SQLException {
+    public VehiculoResponseDTO insertarVehiculo(VehiculoRequestDTO vehiculoRequestDTO) throws DomainException {
         comprobarMarcaYModelo(vehiculoRequestDTO.getIdModelo(), vehiculoRequestDTO.getIdMarca());
         Vehiculo vehiculo = convertFromDTO(vehiculoRequestDTO);
         vehiculoRepository.save(vehiculo);
         return convertToDTO(vehiculo);
     }
 
-    private boolean comprobarMarcaYModelo(int idModelo, int idMarca) throws SQLException {
+    private boolean comprobarMarcaYModelo(int idModelo, int idMarca) throws DomainException {
         if (existeMarca(idMarca)) {
             if (existeModelo(idModelo)) {
                 if (perteneceMarcaAModelo(idModelo, idMarca)) {
                     return true;
                 } else {
-                    throw new SQLException("Error al insertar el vehiclo. " +
+                    throw new DomainException("Error al insertar el vehiclo. " +
                             "El modelo con id: " + idModelo + " no es de la marca con id: " + idMarca);
                 }
             } else {
-                throw new SQLException("Error al insertar el vehiclo. El modelo con id: " + idModelo + " no existe.");
+                throw new DomainException("Error al insertar el vehiclo. El modelo con id: " + idModelo + " no existe.");
             }
         } else {
-            throw new SQLException("Error al insertar el vehiclo. La marca con id: " + idMarca + " no existe.");
+            throw new DomainException("Error al insertar el vehiclo. La marca con id: " + idMarca + " no existe.");
         }
     }
 
     private boolean existeMarca(int idMarca) {
-        if (marcaService.existeIdMarca(idMarca)) {
-            return true;
-        } else {
-            return false;
-        }
+        return marcaService.existeIdMarca(idMarca);
     }
 
     private boolean existeModelo(int idModelo) {
-        if (modeloService.existeIdModelo(idModelo)) {
-            return true;
-        } else {
-            return false;
-        }
+        return modeloService.existeIdModelo(idModelo);
     }
 
     private boolean perteneceMarcaAModelo(int idModelo, int idMarca) {
-        if (modeloService.perteneceMarcaAModelo(idModelo, idMarca)) {
-            return true;
-        } else {
-            return false;
-        }
+        return modeloService.perteneceMarcaAModelo(idModelo, idMarca);
     }
 
     public List<VehiculoResponseDTO> getVehiculos(Integer idMarca) {
-        List<Vehiculo> vehiculosList = new ArrayList<>();
+        List<Vehiculo> vehiculosList;
         if (idMarca != null && idMarca.intValue() > 0) {
             vehiculosList = vehiculoRepository.findByMarca(idMarca.intValue());
         } else {
             vehiculosList = vehiculoRepository.findAll();
         }
 
-        return vehiculosList.stream().map(this::convertToDTO).collect(Collectors.toList());
+        return vehiculosList.stream().map(this::convertToDTO).toList();
     }
 
     public Vehiculo getVehiculo(String matricula) {

@@ -1,37 +1,55 @@
 package com.ejerciciocoches.controller;
 
-import com.ejerciciocoches.exceptions.SQLException;
+import com.ejerciciocoches.exceptions.DomainException;
 import com.ejerciciocoches.model.VehiculoRequestDTO;
 import com.ejerciciocoches.model.VehiculoResponseDTO;
+import com.ejerciciocoches.model.VehiculoUpdateRequestDTO;
 import com.ejerciciocoches.service.VehiculoService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping(
+        value = "/api/v1/vehiculos/",
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
+@AllArgsConstructor
 public class MainController {
 
-    @Autowired
     VehiculoService vehiculoService;
 
-    @RequestMapping("/getAllVehiculos")
+    @RequestMapping("/all")
+    @ResponseStatus(code = HttpStatus.OK)
     public List<VehiculoResponseDTO> getAllVehiculos(@RequestParam(required = false, name = "marca") Integer idMarca) {
         return vehiculoService.getVehiculos(idMarca);
     }
 
-    @RequestMapping("/{matricula}/getVehiculo")
+    @RequestMapping("/{matricula}")
+    @ResponseStatus(code = HttpStatus.OK)
     public VehiculoResponseDTO getVehiculo(@PathVariable("matricula") String matricula) {
         return vehiculoService.getVehiculoDTO(matricula);
     }
 
-    @PostMapping(value = "insertVehiculo")
-    public VehiculoResponseDTO insertVehiculo(@RequestBody VehiculoRequestDTO vehiculoRequestDTO) {
+    @PostMapping(value = "insert")
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public VehiculoResponseDTO insertVehiculo(@RequestBody VehiculoRequestDTO vehiculoRequestDTO) throws DomainException  {
         return vehiculoService.insertarVehiculo(vehiculoRequestDTO);
     }
 
-    @PutMapping(value = "updateVehiculo")
-    public VehiculoResponseDTO updateVehiculo(@RequestBody VehiculoRequestDTO vehiculoRequestDTO) throws Exception {
+    @PutMapping(value = "update")
+    @ResponseStatus(code = HttpStatus.OK)
+    public VehiculoResponseDTO updateVehiculo(@RequestBody VehiculoUpdateRequestDTO vehiculoRequestDTO) throws DomainException {
         return vehiculoService.updateVehiculo(vehiculoRequestDTO);
     }
 }
