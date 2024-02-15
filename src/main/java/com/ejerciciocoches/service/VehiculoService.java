@@ -1,6 +1,6 @@
 package com.ejerciciocoches.service;
 
-import com.ejerciciocoches.exceptions.SQLException;
+import com.ejerciciocoches.exceptions.VehiculoException;
 import com.ejerciciocoches.model.Vehiculo;
 import com.ejerciciocoches.model.VehiculoRequestDTO;
 import com.ejerciciocoches.model.VehiculoResponseDTO;
@@ -28,43 +28,47 @@ public class VehiculoService {
     @Autowired
     MarcaService marcaService;
 
-    @Transactional //Por hacer...
+    @Transactional
     public VehiculoResponseDTO updateVehiculo(VehiculoRequestDTO vehiculoRequestDTO) throws Exception {
         if (comprobarMarcaYModelo(vehiculoRequestDTO.getIdModelo(), vehiculoRequestDTO.getIdMarca())) {
             Vehiculo vehiculo = vehiculoRepository.findByMatriculaVehiculo(vehiculoRequestDTO.getMatriculaVehiculo());
-            vehiculo.setModelo(modeloService.findByIdModelo(vehiculoRequestDTO.getIdModelo()));
-            vehiculo.getModelo().setMarca(marcaService.findByIdMarca(vehiculoRequestDTO.getIdMarca()));
-            vehiculo.setPintura(vehiculoRequestDTO.getColor());
-            //vehiculo.setFechaMatriculacion(vehiculoRequestDTO.getFechaMatriculacion());
-            vehiculo.setCombustible(vehiculoRequestDTO.getCombustible());
-            vehiculoRepository.save(vehiculo);
-            return convertToDTO(vehiculo);
+            if (vehiculo != null) {
+                vehiculo.setModelo(modeloService.findByIdModelo(vehiculoRequestDTO.getIdModelo()));
+                vehiculo.getModelo().setMarca(marcaService.findByIdMarca(vehiculoRequestDTO.getIdMarca()));
+                vehiculo.setPintura(vehiculoRequestDTO.getColor());
+                vehiculo.setFechaMatriculacion(vehiculoMapper.stringToFecha(vehiculoRequestDTO.getFechaMatriculacion()));
+                vehiculo.setCombustible(vehiculoRequestDTO.getCombustible());
+                vehiculoRepository.save(vehiculo);
+                return convertToDTO(vehiculo);
+            } else {
+                throw new VehiculoException("El vehiculo no existe.");
+            }
         } else {
-            throw new Exception();
+            throw new VehiculoException("Error");
         }
     }
 
-    public VehiculoResponseDTO insertarVehiculo(VehiculoRequestDTO vehiculoRequestDTO) throws SQLException {
+    public VehiculoResponseDTO insertarVehiculo(VehiculoRequestDTO vehiculoRequestDTO) throws VehiculoException {
         comprobarMarcaYModelo(vehiculoRequestDTO.getIdModelo(), vehiculoRequestDTO.getIdMarca());
         Vehiculo vehiculo = convertFromDTO(vehiculoRequestDTO);
         vehiculoRepository.save(vehiculo);
         return convertToDTO(vehiculo);
     }
 
-    private boolean comprobarMarcaYModelo(int idModelo, int idMarca) throws SQLException {
+    private boolean comprobarMarcaYModelo(int idModelo, int idMarca) throws VehiculoException {
         if (existeMarca(idMarca)) {
             if (existeModelo(idModelo)) {
                 if (perteneceMarcaAModelo(idModelo, idMarca)) {
                     return true;
                 } else {
-                    throw new SQLException("Error al insertar el vehiclo. " +
+                    throw new VehiculoException("Error al insertar el vehiclo. " +
                             "El modelo con id: " + idModelo + " no es de la marca con id: " + idMarca);
                 }
             } else {
-                throw new SQLException("Error al insertar el vehiclo. El modelo con id: " + idModelo + " no existe.");
+                throw new VehiculoException("Error al insertar el vehiclo. El modelo con id: " + idModelo + " no existe.");
             }
         } else {
-            throw new SQLException("Error al insertar el vehiclo. La marca con id: " + idMarca + " no existe.");
+            throw new VehiculoException("Error al insertar el vehiclo. La marca con id: " + idMarca + " no existe.");
         }
     }
 
