@@ -8,8 +8,8 @@ import lombok.Setter;
 public class VehiculoRequestDTO {
 
     private String matriculaVehiculo;
-    private int idModelo;
-    private int idMarca;
+    private Integer idModelo;
+    private Integer idMarca;
     private String color;
     private String fechaMatriculacion;
     private Combustible combustible;
