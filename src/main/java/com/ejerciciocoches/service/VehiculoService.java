@@ -1,7 +1,7 @@
 package com.ejerciciocoches.service;
 
 import com.ejerciciocoches.exceptions.DomainException;
-import com.ejerciciocoches.model.Vehiculo;
+import com.ejerciciocoches.repository.entity.Vehiculo;
 import com.ejerciciocoches.model.VehiculoRequestDTO;
 import com.ejerciciocoches.model.VehiculoResponseDTO;
 import com.ejerciciocoches.model.VehiculoUpdateRequestDTO;

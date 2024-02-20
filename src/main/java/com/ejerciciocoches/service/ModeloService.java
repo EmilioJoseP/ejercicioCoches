@@ -1,6 +1,6 @@
 package com.ejerciciocoches.service;
 
-import com.ejerciciocoches.model.Modelo;
+import com.ejerciciocoches.repository.entity.Modelo;
 import com.ejerciciocoches.repository.ModeloRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

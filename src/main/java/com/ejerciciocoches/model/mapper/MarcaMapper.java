@@ -1,6 +1,6 @@
 package com.ejerciciocoches.model.mapper;
 
-import com.ejerciciocoches.model.Marca;
+import com.ejerciciocoches.repository.entity.Marca;
 import com.ejerciciocoches.model.MarcaDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

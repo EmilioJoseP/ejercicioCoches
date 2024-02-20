@@ -1,6 +1,6 @@
 package com.ejerciciocoches.repository;
 
-import com.ejerciciocoches.model.Modelo;
+import com.ejerciciocoches.repository.entity.Modelo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

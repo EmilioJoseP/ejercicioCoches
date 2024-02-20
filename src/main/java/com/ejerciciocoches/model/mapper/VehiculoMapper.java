@@ -1,6 +1,7 @@
 package com.ejerciciocoches.model.mapper;
 
 import com.ejerciciocoches.model.*;
+import com.ejerciciocoches.repository.entity.Vehiculo;
 import com.ejerciciocoches.service.MarcaService;
 import com.ejerciciocoches.service.ModeloService;
 import org.mapstruct.Mapper;
@@ -9,7 +10,6 @@ import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 @Mapper(componentModel = "spring")
