@@ -1,6 +1,7 @@
 package com.ejerciciocoches.controller;
 
 import com.ejerciciocoches.exceptions.DomainException;
+import com.ejerciciocoches.model.ApiResponse;
 import com.ejerciciocoches.model.VehiculoRequestDTO;
 import com.ejerciciocoches.model.VehiculoResponseDTO;
 import com.ejerciciocoches.model.VehiculoUpdateRequestDTO;
@@ -43,8 +44,9 @@ public class MainController {
 
     @PostMapping(value = "insert")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public VehiculoResponseDTO insertVehiculo(@RequestBody VehiculoRequestDTO vehiculoRequestDTO) throws DomainException  {
-        return vehiculoService.insertarVehiculo(vehiculoRequestDTO);
+    public ApiResponse<VehiculoResponseDTO> insertVehiculo(@RequestBody VehiculoRequestDTO vehiculoRequestDTO) throws DomainException {
+        return ApiResponse.of(vehiculoService.insertarVehiculo(vehiculoRequestDTO));
+
     }
 
     @PutMapping(value = "update")
