@@ -8,6 +8,7 @@ import com.ejerciciocoches.model.VehiculoUpdateRequestDTO;
 import com.ejerciciocoches.model.mapper.VehiculoMapper;
 import com.ejerciciocoches.repository.VehiculoRepository;
 import lombok.AllArgsConstructor;
+import org.hibernate.mapping.Array;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +24,31 @@ public class VehiculoService {
     ModeloService modeloService;
     MarcaService marcaService;
 
-    @Transactional //Por hacer...
+
+    @Transactional
+    public VehiculoResponseDTO[] updateVehiculos(VehiculoUpdateRequestDTO[] vehiculosRequestDTO) throws DomainException {
+        VehiculoResponseDTO[] vehiculosResponse = new VehiculoResponseDTO[vehiculosRequestDTO.length];
+        int contador = 0;
+        for (VehiculoUpdateRequestDTO vehiculoRequestDTO : vehiculosRequestDTO) {
+            if (comprobarMarcaYModelo(vehiculoRequestDTO.getIdModelo(), vehiculoRequestDTO.getIdMarca())) {
+                Vehiculo vehiculo = vehiculoRepository.findByMatriculaVehiculo(vehiculoRequestDTO.getMatriculaVehiculo());
+                vehiculo.setModelo(modeloService.findByIdModelo(vehiculoRequestDTO.getIdModelo()));
+                vehiculo.getModelo().setMarca(marcaService.findByIdMarca(vehiculoRequestDTO.getIdMarca()));
+                vehiculo.setPintura(vehiculoRequestDTO.getColor());
+                //vehiculo.setFechaMatriculacion(vehiculoRequestDTO.getFechaMatriculacion());
+                vehiculo.setCombustible(vehiculoRequestDTO.getCombustible());
+                vehiculoRepository.save(vehiculo);
+                vehiculosResponse[contador] = convertToDTO(vehiculo);
+                contador++;
+            } else {
+                throw new DomainException("Vehiculo no valido");
+            }
+        }
+
+        return vehiculosResponse;
+    }
+
+    @Transactional
     public VehiculoResponseDTO updateVehiculo(VehiculoUpdateRequestDTO vehiculoRequestDTO) throws DomainException {
         if (comprobarMarcaYModelo(vehiculoRequestDTO.getIdModelo(), vehiculoRequestDTO.getIdMarca())) {
             Vehiculo vehiculo = vehiculoRepository.findByMatriculaVehiculo(vehiculoRequestDTO.getMatriculaVehiculo());

@@ -52,4 +52,10 @@ public class MainController {
     public VehiculoResponseDTO updateVehiculo(@RequestBody VehiculoUpdateRequestDTO vehiculoRequestDTO) throws DomainException {
         return vehiculoService.updateVehiculo(vehiculoRequestDTO);
     }
+
+    @PutMapping(value = "updateVehiculos")
+    @ResponseStatus(code = HttpStatus.OK)
+    public VehiculoResponseDTO[] updateVehiculos(@RequestBody VehiculoUpdateRequestDTO[] vehiculosRequestDTO) throws DomainException {
+        return vehiculoService.updateVehiculos(vehiculosRequestDTO);
+    }
 }
