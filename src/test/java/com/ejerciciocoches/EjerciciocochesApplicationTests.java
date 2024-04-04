@@ -2,23 +2,27 @@ package com.ejerciciocoches;
 
 import com.ejerciciocoches.domain.MarcaDomain;
 import com.ejerciciocoches.domain.mappers.MarcaDomainMapper;
-import com.ejerciciocoches.infrastucture.api.dto.MarcaDTO;
+import com.ejerciciocoches.domain.mappers.MarcaDomainMapperImpl;
 import com.ejerciciocoches.infrastucture.repository.entity.Marca;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions.*;
-import org.mockito.internal.matchers.Equals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+@SpringBootTest(classes = {MarcaDomainMapperImpl.class})
 class EjerciciocochesApplicationTests {
 
 	@Autowired
 	MarcaDomainMapper marcaDomainMapper;
 
+	//o bien quitar la anotación @SpringBootTest y @Autowired y usar
+	//MarcaDomainMapper marcaDomainMapper = new MarcaDomainMapperImpl();
+
 	@Test
-	void contextLoads() {
+	void testFromModelAsNull() {
+		assertNull(marcaDomainMapper.marcaDTOToMarca(null));
 	}
 
 	@Test
@@ -31,7 +35,9 @@ class EjerciciocochesApplicationTests {
 
 		Marca marca = marcaDomainMapper.marcaDomainToMarcaInfra(marcaDomain);
 
+		Assertions.assertEquals(marca.getNombreMarca(), marcaDomain.getNombreMarca());
+		Assertions.assertEquals(marca.getIdMarca(), marcaDomain.getIdMarca());
+		Assertions.assertEquals(marca.getPaisOrigenMarca(), marcaDomain.getPaisOrigenMarca());
 
-		Assertions.assertEquals(marca, marcaDomain);
 	}
 }
