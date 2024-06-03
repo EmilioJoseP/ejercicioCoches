@@ -18,4 +18,9 @@ public class VehiculoResponseDTO {
     public String toString() {
         return "Marca: " + marca + " Modelo: " + modeloString + " Matricula: " + matriculaVehiculo + " Color: " + color + " Fecha Matriculacion: " + fechaMatriculacion + " combustible: " + combustible;
     }
+
+
+    public String toStringPrueba() {
+        return "Matricula " + matriculaVehiculo;
+    }
 }

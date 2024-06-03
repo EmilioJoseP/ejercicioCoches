@@ -4,14 +4,12 @@ import com.ejerciciocoches.domain.ModeloDomain;
 import com.ejerciciocoches.domain.mappers.ModeloDomainMapper;
 import com.ejerciciocoches.domain.mappers.VehiculoDomainMapper;
 import com.ejerciciocoches.domain.exceptions.DomainException;
-import com.ejerciciocoches.infrastucture.repository.VehiculoRepositoryImpl;
+import com.ejerciciocoches.infrastucture.repository.*;
 import com.ejerciciocoches.infrastucture.repository.entity.Vehiculo;
 import com.ejerciciocoches.domain.VehiculoDomain;
 import com.ejerciciocoches.infrastucture.api.dto.VehiculoRequestDTO;
 import com.ejerciciocoches.infrastucture.api.dto.VehiculoResponseDTO;
 import com.ejerciciocoches.infrastucture.api.dto.mappers.VehiculoAPIMapper;
-import lombok.AllArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,8 +21,7 @@ import java.util.List;
 @Service
 public class VehiculoService {
 
-    private final VehiculoRepositoryImpl vehiculoRepositoryImpl;
-
+    private final VehiculoRepository vehiculoRepository;
     private final VehiculoAPIMapper vehiculoMapper;
     private final VehiculoDomainMapper vehiculoDomainMapper;
     private final ModeloDomainMapper modeloDomainMapper;
@@ -32,13 +29,47 @@ public class VehiculoService {
     private final ModeloService modeloService;
     private final MarcaService marcaService;
 
-    public VehiculoService(VehiculoRepositoryImpl vehiculoRepositoryImpl, VehiculoAPIMapper vehiculoMapper, VehiculoDomainMapper vehiculoDomainMapper, ModeloDomainMapper modeloDomainMapper, ModeloService modeloService, MarcaService marcaService) {
+    public VehiculoService(VehiculoRepository vehiculoRepository, VehiculoAPIMapper vehiculoMapper, VehiculoDomainMapper vehiculoDomainMapper, ModeloDomainMapper modeloDomainMapper, ModeloService modeloService, MarcaService marcaService) {
         this.vehiculoMapper = vehiculoMapper;
         this.vehiculoDomainMapper = vehiculoDomainMapper;
         this.modeloDomainMapper = modeloDomainMapper;
         this.modeloService = modeloService;
         this.marcaService = marcaService;
-        this.vehiculoRepositoryImpl = vehiculoRepositoryImpl;
+        this.vehiculoRepository = vehiculoRepository;
+    }
+
+    /*
+
+        Principales
+
+     */
+
+    //Obtiene todos los vehiculos o solo los de la marca de la idMarca que reciba
+    public List<VehiculoDomain> getVehiculos(Integer idMarca) {
+        List<VehiculoDomain> vehiculosList;
+
+        if (idMarca != null && idMarca.intValue() > 0) {
+            vehiculosList = findByMarcaDomain(idMarca.intValue());
+        } else {
+            vehiculosList = findAllDomain();
+        }
+
+        return vehiculosList;
+    }
+
+    public VehiculoDomain getVehiculo(String matricula) {
+        return findByMatriculaVehiculo(matricula);
+    }
+
+    @Transactional
+    public VehiculoDomain insertarVehiculo(VehiculoRequestDTO vehiculoRequestDTO) throws DomainException {
+        VehiculoDomain vehiculo = convertDomainFromDTO(vehiculoRequestDTO);
+        comprobarMarcaYModelo(vehiculo.getModeloDomain().getIdModelo(), vehiculo.getModeloDomain().getMarcaDomain().getIdMarca().intValue());
+        //Se busca el modelo por separado
+        ModeloDomain modeloVehiculoGuardar = modeloDomainMapper.modeloInfraToModeloDomain(modeloService.findByIdModelo(vehiculo.getModeloDomain().getIdModelo()));
+        VehiculoDomain VehiculoGuardado = convertToVehiculoDomain(save(convertToVehiculoInfras(vehiculo)));//pasamos a vehiculo de entity
+        VehiculoGuardado.setModeloDomain(modeloVehiculoGuardar);
+        return VehiculoGuardado;
     }
 
 
@@ -81,16 +112,18 @@ public class VehiculoService {
         }
     }*/
 
-    @Transactional
-    public VehiculoDomain insertarVehiculo(VehiculoRequestDTO vehiculoRequestDTO) throws DomainException {
-        VehiculoDomain vehiculo = convertDomainFromDTO(vehiculoRequestDTO); //tiene sentido? hace falta pasarlo?
-        comprobarMarcaYModelo(vehiculo.getModeloDomain().getIdModelo(), vehiculo.getModeloDomain().getMarcaDomain().getIdMarca().intValue());
-        //He tenido que buscar el modelo por separado
-        ModeloDomain modeloVehiculoGuardar = modeloDomainMapper.modeloInfraToModeloDomain(modeloService.findByIdModelo(vehiculo.getModeloDomain().getIdModelo()));
-        VehiculoDomain VehiculoGuardado = convertToVehiculoDomain(vehiculoRepositoryImpl.save(convertToVehiculoInfras(vehiculo)));//pasamos a vehiculo de entity
-        VehiculoGuardado.setModeloDomain(modeloVehiculoGuardar);
-        return VehiculoGuardado;
+
+    public String deleteVehiculo(String matricula) {
+        Vehiculo VehiculoDelete = vehiculoRepository.findByMatriculaVehiculo(matricula);
+        vehiculoRepository.delete(VehiculoDelete);
+        return matricula;
     }
+
+    /*
+
+        Comprobaciones
+
+     */
 
     private boolean comprobarMarcaYModelo(int idModelo, int idMarca) throws DomainException {
         if (existeMarca(idMarca)) {
@@ -109,12 +142,6 @@ public class VehiculoService {
         }
     }
 
-    public String deleteVehiculo(String matricula) {
-        Vehiculo VehiculoDelete = vehiculoRepositoryImpl.findByMatriculaVehiculo(matricula);
-        vehiculoRepositoryImpl.delete(VehiculoDelete);
-        return matricula;
-    }
-
     private boolean existeMarca(int idMarca) {
         return marcaService.existeIdMarca(idMarca);
     }
@@ -127,25 +154,11 @@ public class VehiculoService {
         return modeloService.perteneceMarcaAModelo(idModelo, idMarca);
     }
 
-    public List<VehiculoResponseDTO> getVehiculos(Integer idMarca) {
-        List<VehiculoDomain> vehiculosList;
-        if (idMarca != null && idMarca.intValue() > 0) {
-            vehiculosList = vehiculoRepositoryImpl.findByMarcaDomain(idMarca.intValue()); //cambio a vehiculoRepositoryImpl
-        } else {
-            vehiculosList = vehiculoRepositoryImpl.findAllDomain();//Cambio a vehiculoRepositoryImpl
-        }
+    /*
 
-        return vehiculosList.stream().map(this::convertToDTO).toList();
-    }
+        Converts
 
-    public Vehiculo getVehiculo(String matricula) {
-        return vehiculoRepositoryImpl.findByMatriculaVehiculo(matricula);
-    }
-
-    /*public VehiculoResponseDTO getVehiculoDTO(String matricula) {
-        Vehiculo Vehiculo = getVehiculo(matricula);
-        return convertToDTO(Vehiculo);
-    }*/
+     */
 
     public Vehiculo convertToVehiculoInfras(VehiculoDomain vehiculo) {
         return vehiculoDomainMapper.vehiculoDomainToVehiculoInfra(vehiculo);
@@ -158,6 +171,10 @@ public class VehiculoService {
     //Se usa para (Consultas)
     public VehiculoResponseDTO convertToDTO(VehiculoDomain Vehiculo) {
         return vehiculoDomainMapper.vehiculoToVehiculoResponseDTO(Vehiculo);
+    }
+
+    public List<VehiculoResponseDTO> convertListToDTO(List<VehiculoDomain> vehiculosDomainList) {
+        return vehiculosDomainList.stream().map(this::convertToDTO).toList();
     }
 
     //Se usa para (Inserts, updates, ...).
@@ -180,4 +197,33 @@ public class VehiculoService {
         Date date = formatter.parse(fechaMatriculacion);
         return date;
     }
+
+    /*
+
+        Repository
+
+     */
+
+    public List<VehiculoDomain> findByMarcaDomain(int idMarca) {
+        List<Vehiculo> listMarcas = vehiculoRepository.findByMarca(idMarca);
+        return listMarcas.stream().map(this::convertToVehiculoDomain).toList();
+    }
+
+    public List<VehiculoDomain> findAllDomain() {
+        List<Vehiculo> listMarcas = vehiculoRepository.findAll();
+        return listMarcas.stream().map(this::convertToVehiculoDomain).toList();
+    }
+
+    public Vehiculo save(Vehiculo vehiculo) {
+        return vehiculoRepository.save(vehiculo);
+    }
+
+    public VehiculoDomain findByMatriculaVehiculo(String matricula) {
+        return convertToVehiculoDomain(vehiculoRepository.findByMatriculaVehiculo(matricula));
+    }
+
+    public void delete(Vehiculo vehiculoDelete) {
+        vehiculoRepository.delete(vehiculoDelete);
+    }
+
 }

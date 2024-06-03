@@ -7,12 +7,16 @@ import com.ejerciciocoches.infrastucture.repository.entity.Vehiculo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Mapper(componentModel = "spring")
-public abstract class VehiculoDomainMapper {
+public interface VehiculoDomainMapper {
+
+    public VehiculoDomainMapper INSTANCE = Mappers.getMapper(VehiculoDomainMapper.class);
 
     @Mapping(target = "color", source = "pintura")
     @Mapping(target = "fechaMatriculacion", source = "fechaMatriculacion", qualifiedByName = "fechaToString")
@@ -29,21 +33,25 @@ public abstract class VehiculoDomainMapper {
     //@Mapping(target = "combustible", source = "stado")
     public abstract VehiculoDomain vehiculoRequestDTOToVehiculoDomain(VehiculoRequestDTO vehiculoRequestDTO);//String stado);
 
+    @Mapping(target = "modelo", source = "modeloDomain")
+    @Mapping(target = "modelo.marca", source = "modeloDomain.marcaDomain")
     public abstract Vehiculo vehiculoDomainToVehiculoInfra(VehiculoDomain vehiculoDomain);
 
+    @Mapping(target = "modeloDomain", source = "modelo")
+    @Mapping(target = "modeloDomain.marcaDomain", source = "modelo.marca")
     public abstract VehiculoDomain vehiculoInfraToVehiculoDomain(Vehiculo vehiculo);
 
 
     //Conversiones manuales
     @Named("fechaToString")
-    public String fechaToString(Date fecha) throws ParseException {
+    default public String fechaToString(Date fecha) throws ParseException {
         SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
         String fechaString = formatoFecha.format(fecha).toString();
         return fechaString;
     }
 
     @Named("stringToFecha")
-    public Date stringToFecha(String fechaMatriculacion) throws ParseException {
+    default public Date stringToFecha(String fechaMatriculacion) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         Date date = formatter.parse(fechaMatriculacion);
         return date;

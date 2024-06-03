@@ -3,19 +3,17 @@ package com.ejerciciocoches.infrastucture.repository;
 import com.ejerciciocoches.infrastucture.repository.entity.Vehiculo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
-@NoRepositoryBean
+@Repository
 public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
 
     List<Vehiculo> findAll();
 
     Vehiculo findByMatriculaVehiculo(String matriculaVehiculo);
 
-    Vehiculo findByidVehiculo(int idVehiculo);
+    //Vehiculo findByidVehiculo(int idVehiculo);
 
     @Query(value = "SELECT v.matricula_vehiculo, v.id_vehiculo, v.id_modelo, v.pintura, v.fecha_matriculacion, v.combustible " +
             "FROM vehiculos v " +
@@ -24,10 +22,10 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
             "WHERE ma.id_marca = :marca", nativeQuery = true)
     List<Vehiculo> findByMarca(int marca);
 
-    @Query(value = "SELECT v.matricula_vehiculo, v.id_vehiculo, v.id_modelo, v.pintura, v.fecha_matriculacion, v.combustible, mo.nombre_modelo, ma.nombre_marca " +
+    /*@Query(value = "SELECT v.matricula_vehiculo, v.id_vehiculo, v.id_modelo, v.pintura, v.fecha_matriculacion, v.combustible, mo.nombre_modelo, ma.nombre_marca " +
             "FROM vehiculos v " +
             "LEFT JOIN modelos mo ON v.id_modelo = mo.id_modelo " +
             "LEFT JOIN marcas ma ON mo.id_marca = ma.id_marca " +
             "WHERE v.id_vehiculo = :idVehiculo", nativeQuery = true)
-    Vehiculo findVehiculo(int idVehiculo);
+    Vehiculo findVehiculo(int idVehiculo);*/
 }

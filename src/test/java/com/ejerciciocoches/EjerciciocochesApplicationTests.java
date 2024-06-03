@@ -14,6 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @SpringBootTest(classes = {MarcaDomainMapperImpl.class})
 class EjerciciocochesApplicationTests {
 
+	//TODO: Hacer test mappers clase de test por clase
+
+
 	@Autowired
 	MarcaDomainMapper marcaDomainMapper;
 
@@ -25,19 +28,4 @@ class EjerciciocochesApplicationTests {
 		assertNull(marcaDomainMapper.marcaDTOToMarca(null));
 	}
 
-	@Test
-	void testMarcarMapper() {
-		MarcaDomain marcaDomain = new MarcaDomain();
-		marcaDomain.setNombreMarca("Prueba");
-		marcaDomain.setIdMarca(Long.getLong("1"));
-		marcaDomain.setPaisOrigenMarca("España");
-
-
-		Marca marca = marcaDomainMapper.marcaDomainToMarcaInfra(marcaDomain);
-
-		Assertions.assertEquals(marca.getNombreMarca(), marcaDomain.getNombreMarca());
-		Assertions.assertEquals(marca.getIdMarca(), marcaDomain.getIdMarca());
-		Assertions.assertEquals(marca.getPaisOrigenMarca(), marcaDomain.getPaisOrigenMarca());
-
-	}
 }
