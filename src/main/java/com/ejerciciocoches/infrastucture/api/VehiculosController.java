@@ -2,6 +2,7 @@ package com.ejerciciocoches.infrastucture.api;
 
 import com.ejerciciocoches.domain.VehiculoDomain;
 import com.ejerciciocoches.domain.exceptions.DomainException;
+import com.ejerciciocoches.domain.mappers.VehiculoDomainMapper;
 import com.ejerciciocoches.infrastucture.api.dto.ApiResponse;
 import com.ejerciciocoches.infrastucture.api.dto.VehiculoRequestDTO;
 import com.ejerciciocoches.infrastucture.api.dto.VehiculoResponseDTO;
@@ -24,9 +25,11 @@ import java.util.List;
 public class VehiculosController {
 
     private final VehiculoService vehiculoService;
+    private final VehiculoDomainMapper vehiculoDomainMapper;
 
-    public VehiculosController(VehiculoService vehiculoService) {
+    public VehiculosController(VehiculoService vehiculoService, VehiculoDomainMapper vehiculoDomainMapper) {
         this.vehiculoService = vehiculoService;
+        this.vehiculoDomainMapper = vehiculoDomainMapper;
     }
 
     @RequestMapping("/all")
@@ -41,7 +44,7 @@ public class VehiculosController {
     @ResponseStatus(code = HttpStatus.OK)
     public VehiculoResponseDTO getVehiculo(@RequestParam("matricula") String matricula) {
         VehiculoDomain vehiculo = vehiculoService.getVehiculo(matricula);
-        return vehiculoService.convertToDTO(vehiculo);
+        return vehiculoDomainMapper.vehiculoToVehiculoResponseDTO(vehiculo);
     }
 
     @PostMapping(value = "insert")
