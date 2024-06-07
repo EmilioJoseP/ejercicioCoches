@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
 import java.util.List;
 
 @RestController
@@ -22,6 +24,7 @@ import java.util.List;
         value = "/api/v1/vehiculos",
         produces = MediaType.APPLICATION_JSON_VALUE
 )
+@EnableWebMvc
 public class VehiculosController {
 
     private final VehiculoService vehiculoService;
@@ -36,7 +39,7 @@ public class VehiculosController {
     @ResponseStatus(code = HttpStatus.OK)
     public List<VehiculoResponseDTO> getAllVehiculos(@RequestParam(required = false, name = "marca") Integer idMarca) {
         List<VehiculoDomain> vehiculos = vehiculoService.getVehiculos(idMarca);
-        return vehiculoService.convertListToDTO(vehiculos);
+        return vehiculos.stream().map(vehiculoDomainMapper::vehiculoToVehiculoResponseDTO).toList();
     }
 
     //TODO: Arreglar funciones comentadas
@@ -50,7 +53,9 @@ public class VehiculosController {
     @PostMapping(value = "insert")
     @ResponseStatus(code = HttpStatus.CREATED)
     public ApiResponse<VehiculoResponseDTO> insertVehiculo(@RequestBody VehiculoRequestDTO vehiculoRequestDTO) throws DomainException {
-        return ApiResponse.of(vehiculoService.convertToDTO(vehiculoService.insertarVehiculo(vehiculoRequestDTO)));
+        VehiculoDomain vehiculoDomain = vehiculoService.insertarVehiculo(vehiculoRequestDTO);
+
+        return ApiResponse.of(vehiculoDomainMapper.vehiculoToVehiculoResponseDTO(vehiculoDomain));
     }
 
     /*@PutMapping(value = "update")
